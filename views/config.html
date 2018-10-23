@@ -1,0 +1,605 @@
+<!doctype html>
+<html>
+<head>
+    <title>Presentation Bridge Config</title>
+<meta charset="UTF-8">
+<style>
+    body
+    {
+        font-family: Helvetica, Arial;
+        background:#efefef;
+    }
+    
+    .connected
+    {
+        color: #00ff00;
+    }
+    .disconnected
+    {
+        color: #cccccc;
+    }
+    .error
+    {
+        color: #ff0000;
+    }
+    
+    #container
+    {
+        position: relative;
+    }
+    
+.onoffswitch {
+    position: relative; width: 130px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
+.onoffswitch-checkbox {
+    display: none;
+}
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #E3E3E3; border-radius: 36px;
+}
+.onoffswitch-inner {
+    display: block; width: 200%; margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; float: left; width: 50%; height: 21px; padding: 0; line-height: 21px;
+    font-size: 16px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner-enabled:before {
+    content: "Enabled";
+    padding-left: 10px;
+    background-color: #FFFFFF; color: #000000;
+}
+.onoffswitch-inner-enabled:after {
+    content: "Disabled";
+    padding-right: 10px;
+    background-color: #FFFFFF; color: #666666;
+    text-align: right;
+}
+
+.onoffswitch-switch {
+    display: block; width: 21px; margin: 0px;
+    background: #A1A1A1;
+    position: absolute; top: 0; bottom: 0;
+    right: 106px;
+    border: 2px solid #E3E3E3; border-radius: 36px;
+    transition: all 0.3s ease-in 0s; 
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px; 
+    background-color: #27A1CA; 
+}
+
+#title
+{
+    position: absolute;
+    top: 0px;
+    left: 10px;
+}
+
+    #divBridgeRooms_Container
+    {
+        background: #ffffff;
+        width: 350px;
+        height: 175px;
+        padding: 5px;
+        position: absolute;
+        top: 70px;
+        left: 10px;
+    }
+    
+    #divConfigSettings
+    {
+        background: #ffffff;
+        width: 350px;
+        height: 175px;
+        padding: 5px;
+        position: absolute;
+        top: 260px;
+        left: 10px;
+    }
+    
+    #divAddBridge
+    {
+        display: block;
+    }
+    
+    #divBridgeFields
+    {
+        background: #ffffff;
+        width: 500px;
+        height: 375px;
+        padding: 5px;
+        position: absolute;
+        top: 70px;
+        left: 375px;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+    
+    #divBridgeFields label
+    {
+        display: inline-block;
+        width: 15em;
+        text-align: right;
+        padding-right: 0.5em;
+    }
+    
+    #divBridgeFields input
+    {
+        display: inline-block;
+    }
+    
+    #divBridgeCurrentLogo
+    {
+        display: inline-block;
+        position: relative;
+    }
+    
+    #divAddButton
+    {
+        position: absolute;
+        top: 350px;
+        right: 10px;
+        display: none;
+    }
+    
+    #divCancelButton
+    {
+        position: absolute;
+        top: 350px;
+        right: 50px;
+        display: none;
+    }
+    
+    #divUpdateButton
+    {
+        position: absolute;
+        top: 350px;
+        right: 10px;
+        display: none;
+    }
+    
+    #divUpdateCancelButton
+    {
+        position: absolute;
+        top: 350px;
+        right: 70px;
+        display: none;
+    }
+    
+    #divDeleteButton
+    {
+        position: absolute;
+        top: 350px;
+        right: 130px;
+        display: none;
+    }
+    
+    #divLog
+    {
+        position: absolute;
+        top: 260px;
+        left: 10px;
+        width: 725px;
+        height: 200px;
+        background: #ffffff;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+    
+    .deleteLogoButton
+    {
+        font-size: 18px;
+        background: #990000;
+        color: #ffffff;
+        width: 18px;
+        height: 20px;
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        text-align: center;
+        margin: 0 auto;
+        cursor: pointer;
+    }    
+</style>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+
+var socket = null;
+var Bridges = [];
+
+var promptedPassword = false; //if we have already alerted the user that the password remains at the default
+
+function onLoad()
+{
+    
+    document.getElementById("btnShowAddBridge").addEventListener("click", function (e) {
+        ShowAddBridgeFields();
+    });
+    
+    document.getElementById("btnAdd").addEventListener("click", function (e) {
+        AddBridge();
+    });
+    
+    document.getElementById("btnCancel").addEventListener("click", function (e) {
+        CancelBridge();
+    });
+    
+    document.getElementById("btnUpdate").addEventListener("click", function (e) {
+        UpdateBridge();
+    });
+    
+    document.getElementById("btnUpdateCancel").addEventListener("click", function (e) {
+        CancelBridge();
+    });
+    
+    document.getElementById("btnDelete").addEventListener("click", function (e) {
+        if (confirm("Are you sure you want to delete this bridge?"))
+        {
+            DeleteBridge();
+        }
+
+    });
+    
+    document.getElementById("btnConfigChangePassword").addEventListener("click", function (e) {
+        ChangePassword();
+    });
+    
+    socket = io.connect();
+
+    socket.on('connect', function() {
+       // Connected, let's sign-up for to receive messages for this room
+       socket.emit("room", "Config");
+       socket.emit("config_bridgeroom_getall");
+    });
+      
+    socket.on('config_bridgerooms', function(bridgeArray){
+        Bridges = bridgeArray;
+        console.log(Bridges);
+        updateList();
+    });
+    
+    socket.on("config_status", function (status) {
+       switch(status)
+       {
+           case "add-success":
+               updateLog("The bridge room was created successfully.", "success");
+               document.getElementById("divBridgeFields").style.opacity = "0";
+               document.getElementById("divBridgeFields").style.visibility = "hidden";
+               socket.emit("config_bridgeroom_getall");
+               break;
+           case "update-success":
+               updateLog("The bridge room was updated successfully.", "success");
+               document.getElementById("divBridgeFields").style.opacity = "0";
+               document.getElementById("divBridgeFields").style.visibility = "hidden";
+               socket.emit("config_bridgeroom_getall");
+               break;
+           case "delete-success":
+               updateLog("The bridge room was deleted successfully.", "success");
+               document.getElementById("divBridgeFields").style.opacity = "0";
+               document.getElementById("divBridgeFields").style.visibility = "hidden";
+               socket.emit("config_bridgeroom_getall");
+               break;
+           case "delete-failure":
+               updateLog("The bridge room could not be deleted because it was not found in the array. It may have already been deleted.", "failure");
+               document.getElementById("divBridgeFields").style.opacity = "0";
+               document.getElementById("divBridgeFields").style.visibility = "hidden";
+               socket.emit("config_bridgeroom_getall");
+           case "changepassword-success":
+               updateLog("Config Password successfully changed.");
+               break;
+           case "changepassword-failure":
+               updateLog("Unable to change Config password: Current Password was incorrect.");
+               break;
+           default:
+               updateLog("Warning", "warning");
+               break;
+       }
+    });
+    
+    socket.on("config_passwordisdefault", function (value) {
+       if (value)
+       {
+           if (!promptedPassword)
+           {
+                alert("The login password is the default password. You should change it.");
+                promptedPassword = true;
+            }
+       }
+    });
+}
+
+function updateLog(message, className)
+{
+    console.log(message);
+}
+
+function updateList()
+{
+    let divBridgeRoomList = document.getElementById("divBridgeRoomList");
+    
+    if (Bridges.length > 0)
+    {
+        let sel = document.createElement("select");
+        let opt = document.createElement("option");
+        opt.value = "";
+        opt.text = "(select a Bridge)";
+        sel.appendChild(opt);
+        
+        for (let i = 0; i < Bridges.length; i++)
+        {
+            let opt = document.createElement("option");
+            opt.value = Bridges[i].id;
+            opt.text = Bridges[i].name;
+
+            sel.appendChild(opt);
+        }
+        
+        sel.setAttribute('onchange', 'ShowEditBridgeFields();');
+        sel.id = "selBridgeFields";
+
+        divBridgeRoomList.innerHTML = "";
+        divBridgeRoomList.appendChild(sel);
+    }
+    else
+    {
+        divBridgeRoomList.innerHTML = "(No bridges exist. Create a new one!)";
+    }
+}
+
+function getUniqueID()
+{
+    let timestamp = (new Date().getTime() / 1000 | 0).toString(16);
+    let mathString = (Math.random() * 16 | 0).toString(16);
+    let id = timestamp + mathString;
+    return id.toLowerCase();
+}
+
+function ShowAddBridgeFields()
+{
+    document.getElementById("txtBridgeID").value = getUniqueID();
+    document.getElementById("txtBridgeName").value = "";
+    document.getElementById("txtBridgeControlPassword").value = "";
+    document.getElementById("txtBridgeObservePassword").value = "";
+    document.getElementById("chkBridgeEnabled").checked = true;
+    document.getElementById("chkBridgeAllowText").checked = true;
+    document.getElementById("chkBridgeAllowImage").checked = true;
+    document.getElementById("fileBridgeLogo").value = "";
+    document.getElementById("fileBridgeLogo").style.display = "inline-block";
+    document.getElementById("divBridgeCurrentLogo").innerHTML = "";
+    document.getElementById("colorpickerBridgeForegroundColor").value = "#FFFFFF";
+    document.getElementById("colorpickerBridgeBackgroundColor").value = "#000000";
+    document.getElementById("selectBridgeFont").selectedIndex = 0;
+    document.getElementById("divBridgeFields").style.visibility = "visible";
+    document.getElementById("divBridgeFields").style.opacity = "1";
+    document.getElementById("divAddButton").style.display = "block";
+    document.getElementById("divCancelButton").style.display = "block";
+    document.getElementById("divUpdateButton").style.display = "none";
+    document.getElementById("divUpdateCancelButton").style.display = "none";
+    document.getElementById("divDeleteButton").style.display = "none";
+}
+
+function ShowEditBridgeFields()
+{
+    let selBridgeFields = document.getElementById("selBridgeFields");
+    let bridgeID = selBridgeFields.options[selBridgeFields.selectedIndex].value;
+    let bridgeObj = null;
+    
+    for (let i = 0; i < Bridges.length; i++)
+    {
+        if (Bridges[i].id === bridgeID)
+        {
+            bridgeObj = Bridges[i];
+            break;
+        }
+    }
+    
+    if (bridgeObj !== null)
+    {
+        document.getElementById("txtBridgeID").value = bridgeObj.id;
+        document.getElementById("txtBridgeName").value = bridgeObj.name;
+        document.getElementById("txtBridgeControlPassword").value = bridgeObj.controlPassword;
+        document.getElementById("txtBridgeObservePassword").value = bridgeObj.observePassword;
+        document.getElementById("chkBridgeEnabled").checked = bridgeObj.enabled;
+        document.getElementById("chkBridgeAllowText").checked = bridgeObj.allowText;
+        document.getElementById("chkBridgeAllowImage").checked = bridgeObj.allowImage;
+        document.getElementById("chkBridgeAllowStageDisplay").checked = bridgeObj.allowStageDisplay;
+        document.getElementById("fileBridgeLogo").value = ""; // need to show image inside div
+        if (bridgeObj.logo)
+        {
+            let imgCurrentLogo = document.createElement("img");
+            imgCurrentLogo.src = bridgeObj.logo;
+            imgCurrentLogo.height = "100";          
+            document.getElementById("divBridgeCurrentLogo").innerHTML = "";
+            document.getElementById("divBridgeCurrentLogo").appendChild(imgCurrentLogo);
+            document.getElementById("fileBridgeLogo").style.display = "none";
+            
+            let divDeleteLogo = document.createElement("div");
+            divDeleteLogo.innerHTML = "&times";
+            divDeleteLogo.className = "deleteLogoButton";
+            divDeleteLogo.setAttribute('onclick', 'DeleteLogo();');
+            document.getElementById("divBridgeCurrentLogo").appendChild(divDeleteLogo);
+        }
+        document.getElementById("colorpickerBridgeForegroundColor").value = bridgeObj.foregroundColor;
+        document.getElementById("colorpickerBridgeBackgroundColor").value = bridgeObj.backgroundColor;
+        let selBridgeFont = document.getElementById("selectBridgeFont");
+        for (let i = 0; i < selBridgeFont.options.length; i++)
+        {
+            if (selBridgeFont.options[i].value === bridgeObj.font)
+            {
+                selBridgeFont.selectedIndex = i;
+                break;
+            }
+        }
+        document.getElementById("divBridgeFields").style.visibility = "visible";
+        document.getElementById("divBridgeFields").style.opacity = "1";
+        document.getElementById("divAddButton").style.display = "none";
+        document.getElementById("divCancelButton").style.display = "none";
+        document.getElementById("divUpdateButton").style.display = "block";
+        document.getElementById("divUpdateCancelButton").style.display = "block";
+        document.getElementById("divDeleteButton").style.display = "block";
+    }
+}
+
+function DeleteLogo()
+{
+    document.getElementById("divBridgeCurrentLogo").innerHTML = "";
+    document.getElementById("fileBridgeLogo").style.display = "inline-block";
+}
+
+function AddBridge()
+{
+    let bridgeObj = {};
+    bridgeObj.id = document.getElementById("txtBridgeID").value;
+    bridgeObj.name = document.getElementById("txtBridgeName").value;
+    bridgeObj.controlPassword = document.getElementById("txtBridgeControlPassword").value;
+    bridgeObj.observePassword = document.getElementById("txtBridgeObservePassword").value;
+    bridgeObj.enabled = document.getElementById("chkBridgeEnabled").checked;
+    bridgeObj.allowText = document.getElementById("chkBridgeAllowText").checked;
+    bridgeObj.allowImage = document.getElementById("chkBridgeAllowImage").checked;
+    bridgeObj.allowStageDisplay = document.getElementById("chkBridgeAllowStageDisplay").checked;
+    let divImg = document.getElementById("divBridgeCurrentLogo");
+    let img = divImg.getElementsByTagName("img");
+    if (img.length > 0)
+    {
+        bridgeObj.logo = img[0].src;
+    }
+    else
+    {
+        bridgeObj.logo = "";
+    }
+    bridgeObj.foregroundColor = document.getElementById("colorpickerBridgeForegroundColor").value;
+    bridgeObj.backgroundColor = document.getElementById("colorpickerBridgeBackgroundColor").value;
+    bridgeObj.font = document.getElementById("selectBridgeFont").options[document.getElementById("selectBridgeFont").selectedIndex].value;
+    
+    socket.emit("config_bridgeroom_add", bridgeObj); // send it to the server
+}
+
+function CancelBridge()
+{
+    document.getElementById("divBridgeFields").style.opacity = "0";
+    document.getElementById("divBridgeFields").style.visibility = "hidden";
+}
+
+function UpdateBridge()
+{
+    let bridgeObj = {};
+    bridgeObj.id = document.getElementById("txtBridgeID").value;
+    bridgeObj.name = document.getElementById("txtBridgeName").value;
+    bridgeObj.controlPassword = document.getElementById("txtBridgeControlPassword").value;
+    bridgeObj.observePassword = document.getElementById("txtBridgeObservePassword").value;
+    bridgeObj.enabled = document.getElementById("chkBridgeEnabled").checked;
+    bridgeObj.allowText = document.getElementById("chkBridgeAllowText").checked;
+    bridgeObj.allowImage = document.getElementById("chkBridgeAllowImage").checked;
+    bridgeObj.allowStageDisplay = document.getElementById("chkBridgeAllowStageDisplay").checked;
+    let divImg = document.getElementById("divBridgeCurrentLogo");
+    let img = divImg.getElementsByTagName("img");
+    if (img.length > 0)
+    {
+        bridgeObj.logo = img[0].src;
+    }
+    else
+    {
+        bridgeObj.logo = "";
+    }
+    bridgeObj.foregroundColor = document.getElementById("colorpickerBridgeForegroundColor").value;
+    bridgeObj.backgroundColor = document.getElementById("colorpickerBridgeBackgroundColor").value;
+    bridgeObj.font = document.getElementById("selectBridgeFont").options[document.getElementById("selectBridgeFont").selectedIndex].value;
+    
+    socket.emit("config_bridgeroom_update", bridgeObj); // send it to the server   
+}
+
+function DeleteBridge()
+{
+    let bridgeObj = {};
+    bridgeObj.id = document.getElementById("txtBridgeID").value;
+    console.log("deleting");
+    console.log(bridgeObj);
+    socket.emit("config_bridgeroom_delete", bridgeObj); // send it to the server
+}
+
+function encodeImageFileAsURL()
+{
+    filesSelected = document.getElementById("fileBridgeLogo").files;
+    
+    if (filesSelected.length > 0)
+    {
+        var fileToLoad = filesSelected[0];
+
+        var fileReader = new FileReader();
+
+        fileReader.onload = function(fileLoadedEvent) {
+            var srcData = fileLoadedEvent.target.result; // <--- data: base64
+
+            var newImage = document.createElement('img');
+            newImage.src = srcData;
+            newImage.height = "100";
+
+            document.getElementById("divBridgeCurrentLogo").appendChild(newImage);
+            document.getElementById("fileBridgeLogo").style.display = "none";
+            document.getElementById("divBridgeFields").style.height = "375px";
+            document.getElementById("divAddButton").style.top = "330px";
+            document.getElementById("divCancelButton").style.top = "330px";
+        };
+      fileReader.readAsDataURL(fileToLoad);
+    }
+}
+
+function ChangePassword()
+{
+    let oldPassword = document.getElementById("txtConfigOldPassword").value;
+    let newPassword = document.getElementById("txtConfigNewPassword").value;
+    socket.emit("config_changepassword", oldPassword, newPassword);
+}
+</script>
+</head>
+<body onLoad="onLoad();">
+<div id="container">
+        <div id="title"><h1>Presentation Bridge Configuration</h1></div>
+        <div id="divBridgeRooms_Container">
+            <div id="divBridgeRoomList"></div>
+            <div id="divAddBridge">
+                <button id="btnShowAddBridge">Add New Bridge</button>
+            </div>
+        </div>
+        <div id="divBridgeFields">
+            <label for="txtBridgeID">ID:</label><input type="text" id="txtBridgeID" value="" size="15" readonly="readonly" /><br />
+            <label for="txtBridgeName">Name:</label><input type="text" id="txtBridgeName" value="" size="30" /><br />
+            <label for="txtBridgeControlPassword">Control Password:</label><input type="text" id="txtBridgeControlPassword" value="" size="30" /><br />
+            <label for="txtBridgeObservePassword">Observe Password:</label><input type="text" id="txtBridgeObservePassword" value="" size="30" /><br />
+            <label for="chkBridgeEnabled">Enabled</label><input type="checkbox" id="chkBridgeEnabled" checked />
+            <label for="chkBridgeAllowText">Allow Text Listeners</label><input type="checkbox" id="chkBridgeAllowText" checked /><br />
+            <label for="chkBridgeAllowImage">Allow Image Listeners</label><input type="checkbox" id="chkBridgeAllowImage" checked /><br />
+            <label for="chkBridgeAllowStageDisplay">Allow Stage Display</label><input type="checkbox" id="chkBridgeAllowStageDisplay" checked /><br />
+            <label for="fileBridgeLogo">Logo:</label><input type="file" id="fileBridgeLogo" onchange="encodeImageFileAsURL()" /><div id="divBridgeCurrentLogo"></div><br />
+            <label for="colorpickerBridgeForegroundColor">Foreground Color (Text):</label><input type="color" id="colorpickerBridgeForegroundColor" /><br />
+            <label for="colorpickerBridgeBackgroundColor">Background Color:</label><input type="color" id="colorpickerBridgeBackgroundColor" /><br />
+            <label for="selectBridgeFont">Font:</label><select id="selectBridgeFont">
+                <option value="helvetica">Helvetica</option>
+                <option value="monospace">Monospace</option>
+            </select>
+            <div id="divAddButton"><button id="btnAdd">Add</button></div>
+            <div id="divCancelButton"><button id="btnCancel">Cancel</button></div>
+            <div id="divUpdateButton"><button id="btnUpdate">Update</button></div>
+            <div id="divUpdateCancelButton"><button id="btnUpdateCancel">Cancel</button></div>
+            <div id="divDeleteButton"><button id="btnDelete">Delete</button></div>
+        </div>
+        <div id="divConfigSettings">
+            <b>Change Config Password:</b><br />
+            <label for="txtConfigOldPassword">Old Password:</label><input type="password" id="txtConfigOldPassword" value="" size="30" /><br />
+            <label for="txtConfigNewPassword">New Password:</label><input type="password" id="txtConfigNewPassword" value="" size="30" /><br />
+            <button id="btnConfigChangePassword">Change Config Password</button>
+        </div>
+        <div id="divLog"></div>
+</div>
+</body>
+</html>

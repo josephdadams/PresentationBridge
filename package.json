@@ -1,0 +1,21 @@
+{
+    "name": "presentationbridge",
+    "version": "1.0.0",
+    "description": "Bridges presentation data from software like ProPresenter to a master server which can then relay the information to many unathenticated clients.",
+    "keywords": [
+        "util",
+        "functional",
+        "server",
+        "client",
+        "browser",
+        "bridge",
+        "propresenter"
+    ],
+    "license": "MIT",
+    "author": "Joseph Adams",
+    "dependencies": {
+        "express": "^4.16.3",
+        "socket.io": "^2.1.1"
+    }
+    "main": "main.js"
+}

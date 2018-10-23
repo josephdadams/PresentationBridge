@@ -1,0 +1,434 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Presentation Bridge</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no'/>
+        <style>
+        *
+        {
+            margin: 0;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        html
+        {
+            -webkit-text-size-adjust: none;
+            text-size-adjust: none;
+        }
+
+        body
+        {
+            font-family: Avenir, Helvetica, Arial;
+            font-size: 12vmin;
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .container
+        {
+            position: relative;
+        }
+
+        #current_slide
+        {
+            display: block;
+            text-align:center;
+            transition: color .5s ease 0s, opacity 0.5s linear;
+        }
+
+        #divSelectBridge
+        {
+            display: none;
+            width: 200px;
+            height: 600px;
+            font-size: 14px;
+
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+
+            max-width:100%;
+            max-height:100%;
+        }
+
+        #divBridgeLogo
+        {
+            display: flex;
+            justify-content: center;
+        }
+
+        #selBridgeList
+        {
+            font-size: 18px;
+            height: 30px;
+            width: 200px;
+        }
+
+        #divBridgePassword
+        {
+            display: none;
+        }
+
+        #divLogo
+        {
+            opacity: 0;
+            transition: opacity 0.5s linear;
+            display: none;
+            height: 100%;
+        }
+        .imgLogo
+        {
+            max-width: 100%;
+            max-height: 100vh;
+            margin: auto;
+        }
+        
+        #divWaiting
+        {
+            animation: waiting-blink 1.5s ease infinite alternate;
+            display: none;
+            width: 300px;
+            height: 600px;
+            font-size: 18px;
+            text-align: center;
+            color: #ffffff;
+
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+
+            max-width:100%;
+            max-height:100%;
+        }
+        
+        @keyframes waiting-blink
+        { 
+            50%
+            {
+                color: #ff0000;
+            }
+        }
+        </style>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="lib/nosleep.min.js"></script>
+        <script>
+        var socket = null;
+        var Bridges = [];
+        var selectedBridgeID = null;
+
+        var noSleep = new NoSleep();
+        var KeepAwake = false;
+
+        function onLoad()
+        {
+            document.getElementById("btnLogin").addEventListener("click", function (e) {
+                loginBridge(selectedBridgeID, document.getElementById("txtObservePassword").value);
+            });
+
+            socket = io.connect();
+
+            socket.on('connect', function() {
+               // Connected, let's sign-up for to receive messages for this room
+               socket.emit('room', "TextListeners");
+            });
+
+            socket.on("bridgerooms", function(bridgeArray) {
+                Bridges = bridgeArray;
+                updateBridgeList();
+            });
+
+            socket.on("status", function(status) {
+                switch(status)
+                {
+                    case "success":
+                        socket.emit("listener_get_current_slide", selectedBridgeID);
+                        document.getElementById("divSelectBridge").style.display = "none";
+                        setStyles();
+                        GoToLogo(getBridge(selectedBridgeID).logoMode);
+                        document.title = getBridgeFromID(selectedBridgeID).name;
+                        break;
+                    case "failure":
+                        alert("Incorrect password. Please try again.");
+                        break;
+                    default:
+                        break;
+                }
+            });
+            
+            socket.on("bridgeinuse", function(value) {
+                if (value)
+                {
+                    //hide the "waiting" div
+                    document.getElementById("divWaiting").style.display = "none";
+                }
+                else
+                {
+                    //show the "waiting" div
+                    document.getElementById("divWaiting").style.display = "block";
+                    GoToLogo(true);
+                } 
+            });
+
+            socket.on('announcement', function(text){
+                let announcement = document.getElementById("announcement");
+
+                if (text !== null)
+                {
+                    if (text === "")
+                    {
+                        announcement.style.opacity = "0";
+                    }
+                    else
+                    {
+                        if (announcement.innerHTML === "")
+                        {
+                            announcement.style.opacity = "0";
+                            setTimeout(function() {
+                                announcement.innerHTML = text.replaceAll("\n","<br>").replaceAll("\r","<br>");
+                                announcement.style.opacity = "1";
+                            }, 500);
+                        }
+                        else
+                        {
+                            announcement.innerHTML = text.replaceAll("\n","<br>").replaceAll("\r","<br>");
+                            announcement.style.opacity = "1";
+                        }
+                    }
+                }
+            });
+
+            socket.on("redirect", function(url) {
+               window.location.href = url; 
+            });
+
+            socket.on("reload", function(value) {
+                if (value)
+                {
+                    window.location.reload(true);
+                }
+            });
+
+            socket.on('current_slide', function(text) {
+                let currentSlide = document.getElementById("current_slide");
+
+                if (text !== null)
+                {
+                    if (text === "")
+                    {
+                        currentSlide.style.opacity = "0";
+                    }
+                    else
+                    {
+                        if (currentSlide.innerHTML === "")
+                        {
+                            currentSlide.style.opacity = "0";
+                            setTimeout(function() {
+                                currentSlide.innerHTML = text.replaceAll("\n","<br>").replaceAll("\r","<br>");
+                                currentSlide.style.opacity = "1";
+                            }, 500);
+                        }
+                        else
+                        {
+                            currentSlide.innerHTML = text.replaceAll("\n","<br>").replaceAll("\r","<br>");
+                            currentSlide.style.opacity = "1";
+                        }
+                    }
+                }
+            });
+
+            socket.on("gotologo", function(value) {
+               GoToLogo(value);
+            });
+
+            socket.on("keepawake", function(value) {
+               KeepScreenAwake(value);
+            });
+
+            document.addEventListener('click', enableNoSleep, false);
+        }
+
+        String.prototype.replaceAll = function(search, replacement) {
+            var target = this;
+            return target.split(search).join(replacement);
+        };
+
+        function updateBridgeList()
+        {
+            var selBridgeList = document.getElementById("selBridgeList");
+            selBridgeList.options.length = 0;
+
+            if (Bridges.length > 1)
+            {  
+                let default_opt = document.createElement("option");
+                default_opt.value = "0";
+                default_opt.text = "(select a Bridge)";
+                selBridgeList.appendChild(default_opt);
+                for (let i = 0; i < Bridges.length; i++)
+                {
+                    let opt = document.createElement("option");
+                    opt.value = Bridges[i].id;
+                    opt.text = Bridges[i].name;
+                    selBridgeList.appendChild(opt);
+                }
+                selBridgeList.setAttribute('onchange', 'selectBridgeFromList();');
+                document.getElementById("divSelectBridge").style.display = "block";
+            }
+            else if (Bridges.length === 1) // just load the only one available
+            {
+                selectBridge(Bridges[0].id);
+            }
+        }
+
+        function selectBridgeFromList()
+        {
+            let sel = document.getElementById("selBridgeList");
+            let id = sel.options[sel.selectedIndex].value;
+            if (id !== "0")
+            {
+                selectBridge(id);
+            }
+            else
+            {
+                document.getElementById("divBridgePassword").style.display = "none";
+            }
+        }
+
+        function selectBridge(bridgeID)
+        {
+            let bridgeObj = getBridge(bridgeID);
+            if (bridgeObj.requiresPassword)
+            {
+                document.getElementById("divBridgePassword").style.display = "block";
+            }
+            else
+            {
+                socket.emit("textlistener_joinbridgeroom", bridgeID, "");
+            }
+            selectedBridgeID = bridgeID;
+        }
+
+        function getBridgeFromID(bridgeID)
+        {
+            return Bridges.find(function (obj) { return obj.id.toString() === bridgeID; });
+        }
+
+        function loginBridge(bridgeID, password)
+        {
+            socket.emit("textlistener_joinbridgeroom", bridgeID, password);
+        }
+
+        function setStyles()
+        {
+            for (let i = 0; i < Bridges.length; i++)
+            {
+                if (Bridges[i].id === selectedBridgeID)
+                {
+                    document.body.style.color = Bridges[i].foregroundColor;
+                    document.body.style.background = Bridges[i].backgroundColor;
+                    document.body.style.fontFamily = Bridges[i].font;       
+                    break;
+                }
+            }
+        }
+
+        function getBridge(bridgeID)
+        {
+            let bridgeObj = null;
+
+            for (let i = 0; i < Bridges.length; i++)
+            {
+                if (Bridges[i].id === bridgeID)
+                {
+                    bridgeObj = Bridges[i];
+                }
+            }
+
+            return bridgeObj;
+        }
+
+        function GoToLogo(value)
+        {
+            if (value)
+            {
+                //show logo
+                document.getElementById("current_slide").style.opacity = "0";
+
+                let imgData = getBridge(selectedBridgeID).logo;
+                if (imgData !== "")
+                {
+                    let imgObj = document.createElement("img");
+                    imgObj.src = imgData;
+                    imgObj.className = "imgLogo";            
+                    setTimeout(function() {
+                        document.getElementById("divLogo").innerHTML = "";
+                        document.getElementById("divLogo").appendChild(imgObj);
+                        document.getElementById("divLogo").style.display = "grid";
+                        setTimeout(function() {
+                            document.getElementById("divLogo").style.opacity = "1";
+                        }, 50);
+                    }, 500);
+
+                }
+            }
+            else
+            {
+                //hide logo
+                document.getElementById("divLogo").style.opacity = "0";
+                setTimeout(function() {
+                    document.getElementById("divLogo").style.display = "none";
+                    document.getElementById("current_slide").style.opacity = "1";
+                }, 500);
+
+            }
+        }
+
+        function KeepScreenAwake(value)
+        {
+            //keeps the phone screen on if true by using the NoSleep library - playing a dummy video in the background
+
+            KeepAwake = value;
+
+            if (!value)
+            {
+                noSleep.disable();
+            }
+        }
+
+        function enableNoSleep()
+        {
+            if (KeepAwake)
+            {
+                noSleep.enable();
+                document.removeEventListener('click', enableNoSleep, false);
+            }
+        }
+        </script>
+    </head>
+  <body onLoad="onLoad();">
+        <div id="container">
+            <div id="divLogo"></div>
+            <div id="divSelectBridge">
+                <div id="divBridgeLogo">
+                    <img id="imgBridgeLogo" src="images/logo_dark.png" alt="Presentation Bridge"/><br />
+                </div>
+                <select id="selBridgeList">
+                </select>
+                <div id="divBridgePassword">
+                    Password:
+                    <input type="password" id="txtObservePassword" size="15" />
+                    <button id="btnLogin">Login</button>
+                </div>
+            </div>
+            <div id="divWaiting">WAITING FOR<br />BRIDGE TO CONNECT...</div>
+            <div id="announcement"></div>
+            <div id="current_slide"></div>
+        </div>
+  </body>
+</html>

@@ -1,0 +1,1618 @@
+<!doctype html>
+<html>
+<head>
+    <title>Presentation Bridge</title>
+<meta charset="UTF-8">
+<style>
+    body
+    {
+        font-family: Helvetica, Arial;
+        background:#efefef;
+    }
+    
+.onoffswitch {
+    position: relative; width: 130px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
+.onoffswitch-checkbox {
+    display: none;
+}
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #E3E3E3; border-radius: 36px;
+}
+.onoffswitch-inner {
+    display: block; width: 200%; margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; float: left; width: 50%; height: 21px; padding: 0; line-height: 21px;
+    font-size: 16px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner-senddata:before {
+    content: "Send Data";
+    padding-left: 10px;
+    background-color: #FFFFFF; color: #000000;
+}
+.onoffswitch-inner-senddata:after {
+    content: "Do Not Send Data";
+    padding-right: 10px;
+    background-color: #FFFFFF; color: #666666;
+    text-align: right;
+}
+.onoffswitch-inner-GoToLogo:before {
+    content: "Logo On";
+    padding-left: 10px;
+    background-color: #FFFFFF; color: #000000;
+}
+.onoffswitch-inner-GoToLogo:after {
+    content: "Logo Off";
+    padding-right: 10px;
+    background-color: #FFFFFF; color: #666666;
+    text-align: right;
+}
+
+.onoffswitch-inner-KeepAwake:before {
+    content: "Keep Awake";
+    padding-left: 10px;
+    background-color: #FFFFFF; color: #000000;
+}
+.onoffswitch-inner-KeepAwake:after {
+    content: "Let Sleep";
+    padding-right: 10px;
+    background-color: #FFFFFF; color: #666666;
+    text-align: right;
+}
+
+.onoffswitch-inner-playlist:before {
+    content: "Follow ProPresenter";
+    padding-left: 10px;
+    background-color: #FFFFFF; color: #000000;
+}
+.onoffswitch-inner-playlist:after {
+    content: "Do Not Follow";
+    padding-right: 10px;
+    background-color: #FFFFFF; color: #666666;
+    text-align: right;
+}
+
+.onoffswitch-switch {
+    display: block; width: 21px; margin: 0px;
+    background: #A1A1A1;
+    position: absolute; top: 0; bottom: 0;
+    right: 106px;
+    border: 2px solid #E3E3E3; border-radius: 36px;
+    transition: all 0.3s ease-in 0s; 
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px; 
+    background-color: #27A1CA; 
+}
+
+.w3-ul.w3-hoverable li:hover{background-color:#82b1ff}
+.w3-ul{list-style-type:none;padding:0;margin:0}
+.w3-ul li{padding:2px 8px;border-bottom:1px solid #ddd}
+.w3-ul li:last-child{border-bottom:none}
+
+    .dot
+    {
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
+        display: inline-block;   
+    }
+    .connected
+    {
+        color: #00aa00;
+    }
+    .connected_dot
+    {
+        background-color: #00aa00;
+    }
+    
+    .disconnected
+    {
+        color: #cccccc;
+    }
+    
+    .disconnected_dot
+    {
+        background-color: #bbb;
+    }
+    
+    .error
+    {
+        color: #ff0000;
+        font-weight: bold;
+    }
+    
+    .normal
+    {
+        color: #000000;
+    }
+    .normal-bold
+    {
+        color: #000000;
+        font-weight: bold;
+    }
+    
+    .error_dot
+    {
+        background-color: #ff0000;
+    }
+    
+    .expired
+    {
+        color: #666666;
+    }
+    
+    #title
+    {
+        position: absolute;
+        display: inline;
+        top: 5px;
+        left: 10px;
+    }
+    
+    #container
+    {
+        position: relative;
+    }
+    
+    #divProPresenterConfig
+    {
+        background: #ffffff;
+        width: 250px;
+        height: 175px;
+        padding: 5px;
+        position: absolute;
+        top: 50px;
+        left: 10px;
+    }
+    
+    #divProPresenterConfig label
+    {
+        display: inline-block;
+        width: 8em;
+        font-size:12px;
+        text-align: right;
+        padding-right: 0.5em;
+    }
+    
+    #divProPresenterConfig input
+    {
+        display: inline-block;
+    }
+    
+    #spanProPresenterConnectionStatusCircle
+    {
+        position: absolute;
+        top: 5px;
+        left: 245px;
+    }
+    
+    #spanBridgeConnectionStatusCircle
+    {
+        position: absolute;
+        top: 5px;
+        left: 245px;
+    }
+    
+    #divBridgeConfig
+    {
+        background: #ffffff;
+        width: 250px;
+        height: 175px;
+        padding: 5px;
+        position: absolute;
+        top: 50px;
+        left: 275px;
+    }
+    
+    #divConnectionStatus
+    {
+        background: #ffffff;
+        width: 515px;
+        height: 100px;
+        padding: 5px;
+        position: absolute;
+        top: 240px;
+        left: 10px;
+        display: inline-block;
+        visibility: visible;
+        opacity: 1;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+    
+    #divSendToBridge
+    {
+        position: absolute;
+        top: 5px;
+        left: 110px;
+    }
+    
+    #divGoToLogo
+    {
+        position: absolute;
+        top: 40px;
+        left: 110px;
+    }
+    
+    #divLogContainer
+    {
+        background: #ffffff;
+        width: 515px;
+        height: 100px;
+        padding: 5px;
+        position: absolute;
+        top: 570px;
+        left: 10px;
+        margin: 0 auto;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+    
+    #divLog
+    {
+        background: #cccccc;
+        font-family: monospace;
+        padding: 5px;
+        width: 510px;
+        height: 100px;
+        overflow-y: scroll;
+        -webkit-user-select: text;
+
+    }
+    
+    #divProPresenterData_Container
+    {
+        background: #ffffff;
+        width: 515px;
+        height: 200px;
+        padding: 5px;
+        position: absolute;
+        top: 355px;
+        left: 10px;
+        text-align: center;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+    
+    #divProPresenterData
+    {
+        width: 100%;
+        margin: 0 auto;
+        display: block;
+        position: relative;
+    }
+    
+    #divProPresenter_CurrentSlide_Container
+    {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: none;
+    }
+    
+    #divProPresenter_CurrentSlide
+    {
+        background: #000000;
+        color: #ffffff;
+        width: 240px;
+        height: 135px;
+        padding: 5px;
+        display: inline-block;
+    }
+    
+    #divProPresenter_CurrentSlide_ImageContainer
+    {
+        position: absolute;
+        display: none;
+        top: 10px;
+        left: 265px;
+    }
+    
+    #divProPresenter_CurrentSlide_Image
+    {
+        background: #000000;
+        width: 250px;
+        height: 145px;
+        padding: 0px;
+        display: inline-block;
+    }
+    
+    #divProPresenter_CurrentSlide_Notes
+    {
+        display: none;
+    }
+    
+    #divProPresenter_NextSlide_Container
+    {
+        display: none;
+    }
+    
+    #divProPresenter_NextSlide
+    {
+        background: #000000;
+        color: #00ff00;
+        width: 240px;
+        height: 135px;
+        padding: 5px;
+        display: inline-block;
+    }
+    
+    #divProPresenter_NextSlide_Notes
+    {
+        display: block;
+    }
+    
+    #divProPresenter_PlaylistArea_Container
+    {
+        display:none;
+        top: 180px;
+        left: 10px;
+    }
+    
+    #divProPresenter_Playlists
+    {
+        display: inline;
+        vertical-align: top;
+        text-align: left;
+        width: 210px;
+        height: 200px;
+        overflow-y: scroll;
+    }
+    
+    #divProPresenter_PlaylistItems
+    {
+        display: inline;
+        vertical-align: top;
+        text-align: left;
+        width: 275px;
+        height: 200px;
+        overflow-y: scroll;
+    }
+    
+    #divProPresenter_PlaylistFollowControls
+    {
+        position: absolute;
+        top: 5px;
+        left: 250px;
+        display: none;
+    }
+    
+    #btnConnectToProPresenter
+    {
+        position: absolute;
+        top: 140px;
+        left: 155px;
+        width: 100px;
+        height: 40px;
+        background-color: #3894ff;
+        color: #ffffff;
+    }
+    
+    #selBridgeList
+    {
+        position: absolute;
+        top: 70px;
+        left: 80px;
+    }
+    
+    #labelBridgeControlPassword
+    {
+        position: absolute;
+        font-size: 12px;
+        top: 103px;
+        left: 20px;
+        display: none;
+    }
+    
+    #txtBridgeControlPassword
+    {
+        position: absolute;
+        top: 100px;
+        left: 80px;
+        display: none;
+    }
+    
+    #btnConnectToBridge
+    {
+        position: absolute;
+        top: 140px;
+        left: 155px;
+        width: 100px;
+        height: 40px;
+        background-color: #3894ff;
+        color: #ffffff;
+    }
+    
+    #btnDisconnectBridge
+    {
+        position: absolute;
+        top: 140px;
+        left: 155px;
+        width: 100px;
+        height: 40px;
+        background-color: #990000;
+        color: #ffffff;
+        display: none;
+    }
+    
+    #btnRefreshData
+    {
+        display: none;
+        width: 100px;
+        height: 80px;
+        background-color: #3894ff;
+        color: #ffffff;
+    }
+    
+    #divClearAll
+    {
+        position: absolute;
+        top: 5px;
+        left: 420px;
+    }
+    
+    #btnClearAll
+    {
+        display: none;
+        width: 100px;
+        height: 80px;
+        background-color: #3894ff;
+        color: #ffffff;
+    }
+    
+    #divSendToBridge
+    {
+        display: none;
+    }
+    
+    #divGoToLogo
+    {
+        display: none;
+    }
+    
+    #divProgressBar
+    {
+        width: 100px;
+        position: absolute;
+        display:none;
+        left: 10px;
+        top: 5px;
+        background-color: #908686;
+    }
+    
+    #progressBar
+    {
+        width: 1%;
+        -webkit-transition: width 1s;
+        height: 15px;
+        background-color: #3894ff;
+    }
+    
+    #divProPresenter_PresentationItems_Container
+    {
+        background: #666666;
+        height: 655px;
+        min-width: 515px;
+        max-width: 100%;
+        position: absolute;
+        top: 50px;
+        left: 540px;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+    
+    #divProPresenter_PresentationItems_Title
+    {
+        background: #cccccc;
+        font-weight: bold;
+        font-size: 18px;
+        height: 20px;
+        padding: 5px;
+        z-index: 3;
+    }
+    
+    #divProPresenter_PresentationItems
+    {
+        height: 635px;
+        min-width: 515px;
+        overflow-y: scroll;
+    }
+    
+    .slideBox
+    {
+        width: 207px;
+        height: 139px;
+        display: inline-block;
+        border: #666666 5px solid;
+        border-radius: 5px;
+        margin: 0 auto;
+    }
+    
+    @keyframes selected-blink { 
+       50% { border-color: #ff0000; } 
+    }
+    
+    .innerslideBox
+    {
+        width: 200px;
+        height: 133px;
+        display: inline-block;
+        border: #eeeeee 3px solid;
+        border-radius: 5px;
+        margin: 0 auto;
+    }
+    
+    #divProPresenter_PresentationItems_Options
+    {
+        background: #cccccc;
+        height: 20px;
+        padding: 5px;
+        z-index: 3;
+    }
+        
+    #settingsImage
+    {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 160px;
+        left: 5px;
+    }
+    
+    #divAnnouncements
+    {
+        background: #ffffff;
+        width: 515px;
+        height: 125px;
+        padding: 5px;
+        position: absolute;
+        top: 690px;
+        left: 10px;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+    
+    #txtAnnouncements_URL
+    {
+        width: 200px;
+    }
+    
+    #btnAnnouncements_RedirectTo
+    {
+        position: absolute;
+        top: 10px;
+        left: 215px;
+        width: 100px;
+        height: 40px;
+        background-color: #3894ff;
+        color: #ffffff;
+    }
+    
+    #txtAnnouncements_Text
+    {
+        width: 200px;
+        height: 40px;
+    }
+    
+    #btnAnnouncements_SendText
+    {
+        position: absolute;
+        top: 80px;
+        left: 215px;
+        width: 100px;
+        height: 40px;
+        background-color: #3894ff;
+        color: #ffffff;
+    }
+    
+    #btnAnnouncements_ReloadListeners
+    {
+        position: absolute;
+        top: 75px;
+        left: 415px;
+        width: 100px;
+        height: 50px;
+        background-color: #3894ff;
+        color: #ffffff;
+    }
+    
+    #divKeepAwake
+    {
+        position: absolute;
+        top: 40px;
+        left: 250px;
+        display: none;
+    }
+    
+    #divConnectedClients
+    {
+        background: #ffffff;
+        width: 515px;
+        height: 65px;
+        padding: 5px;
+        position: absolute;
+        top: 750px;
+        left: 540px;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+    
+    #divProPresenter_PresentationItems_Options_Index
+    {
+        position: absolute;
+        left: 10px;
+    }
+    
+    #divProPresenter_PresentationItems_Options_Zoom
+    {
+        position: absolute;
+        right: 10px;
+    }
+</style>
+<script type="text/javascript" src="/lib/jquery-1.12.0.min.js"></script>
+<script type="text/javascript" src="/lib/jquery.json.min.js"></script>
+<script type="text/javascript" src="/lib/jquery.simple.websocket.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+var webSocketRemote = null;
+var webSocketStageDisplay = null;
+var config = {};
+
+var Playlists = []; // all of the Playlists currently in ProPresenter
+var Presentations = []; // all of the Presentations in all of the Playlists currently in ProPresenter
+
+var Bridges = []; // the active array of Bridge Rooms available, updates dynamically as new bridges are created
+
+var socket = null;
+var Clients = []; // array of currently connected clients
+
+var playlist_items_toprocess = 0; // temporary variable we will use whenever we are requesting playlist information, to know when it should be completed
+var playlist_items_total = 0;
+var __bridgeEnabled = false;
+var selectedBridgeID = "";
+
+var selectedPresentation = null; // the currently selected presentation in the container from the playlists
+
+function onLoad()
+{
+    document.getElementById("btnConnectToProPresenter").addEventListener("click", function (e) {
+        ConnectToProPresenter();
+    });
+    
+    document.getElementById("btnRefreshData").addEventListener("click", function (e) {
+        requestPlaylists();
+    });
+    
+    document.getElementById("btnClearAll").addEventListener("click", function (e) {
+        ProPresenter_ClearAll();
+    });
+    
+    document.getElementById("btnConnectToBridge").addEventListener("click", function (e) {
+        BridgeRooms_Login();
+    });
+    
+    document.getElementById("btnDisconnectBridge").addEventListener("click", function (e) {
+        BridgeRooms_Disconnect();
+    });
+    
+    document.getElementById("btnAnnouncements_RedirectTo").addEventListener("click", function (e) {
+        Bridge_Redirect();
+    });
+    
+    document.getElementById("btnAnnouncements_SendText").addEventListener("click", function (e) {
+        Bridge_SendAnnouncement();
+    });
+    
+    document.getElementById("btnAnnouncements_ReloadListeners").addEventListener("click", function (e) {
+        Bridge_Reload();
+    });
+    
+    document.getElementById("chkSendToBridge").addEventListener("click", function (e) {
+        __bridgeEnabled = document.getElementById("chkSendToBridge").checked;
+        if (__bridgeEnabled)
+        {
+            //Bridge_GoToLogo(false);
+        }
+        else
+        {
+            //Bridge_GoToLogo(true);
+        }
+    });
+    
+    document.getElementById("chkGoToLogo").addEventListener("click", function (e) {
+        Bridge_GoToLogo(document.getElementById("chkGoToLogo").checked);
+    });
+    
+    document.getElementById("chkKeepAwake").addEventListener("click", function (e) {
+        Bridge_KeepAwake(document.getElementById("chkKeepAwake").checked);
+    });
+    
+    
+    BridgeRooms_Connect();
+}
+
+function updateLog(text, cssClass)
+{
+    let divLog = document.getElementById("divLog");
+    //let oldSpan = document.createElement("span"); // we put the existing contents of the log here first
+    //let spanTimeStamp = document.createElement("span"); // date/time stamp for log
+    let span = document.createElement("span"); // new log entry
+    
+    //oldSpan.innerHTML = divLog.innerHTML;
+    //divLog.innerHTML = "";
+    //oldSpan.className = "expired";
+    
+    /*let d = new Date();
+    let dateTimeString = "";
+    
+    dateTimeString += d.getMonth() + "/" + d.getDate() + "/" + d.getFullYear();
+    dateTimeString += ((d.getHours() + 11) % 12 + 1) + ":" + (10 > d.getMinutes() ? "0" : "") + d.getMinutes();
+    dateTimeString += (10 > d.getSeconds() ? "0" : "") + d.getSeconds();
+    dateTimeString += d.getHours() >= 12 ? "pm" : "am";
+    
+    spanTimeStamp.innerHTML = dateTimeString;*/
+    
+    span.innerHTML = text;
+    span.className = cssClass;
+    span.style.display = "block";
+    
+    //divLog.appendChild(oldSpan);
+    //divLog.appendChild(spanTimeStamp);
+    divLog.appendChild(span);
+    divLog.scrollTop = divLog.scrollHeight;
+}
+
+function ConnectToProPresenter()
+{
+    config['propresenter_ip'] = document.getElementById("txtProPresenterIP").value; // add error checking
+    config['propresenter_port'] = document.getElementById("txtProPresenterPort").value; // add range checking
+    config['propresenter_password'] = document.getElementById("txtProPresenterPassword").value;
+    config['propresenter_librarypath'] = document.getElementById("txtProPresenterLibraryPath").value;
+    
+    setupStageDisplaySocket();
+    setupRemoteSocket();
+    
+    webSocketRemote.listen(function(message) {                    
+        switch(message.action)
+        {
+            case "authenticate":
+                //do something with the authenticated data
+                if (message.authenticated)
+                {
+                    requestPlaylists();
+                }
+                break;
+            case "playlistRequestAll":
+                ProPresenterAPI_AddPlaylistsToArray(message);
+                break;
+            case "presentationCurrent":
+                ProPresenterAPI_AddPresentationToArray(message);
+                break;
+            case "presentationTriggerIndex":
+                findPresentation(message);
+                break;
+            case "clearAll":
+                document.getElementById("divProPresenter_CurrentSlide_Image").innerHTML = "";
+                updateImageListeners("current_slide_image", "clear");
+                break;
+            default:
+                console.log("the action was: " + message.action);
+                break;
+        }
+    });
+        
+    // Stage Display incoming messages
+    webSocketStageDisplay.listen(function(message) {
+        switch(message.acn)
+        {
+            case "ath":
+                if (message.ath)
+                {
+                    updateLog("Connected to ProPresenter.", "connected");
+                    document.getElementById("spanProPresenterConnectionStatusCircle").className = "dot connected_dot";
+                    document.getElementById("btnConnectToProPresenter").disabled = true;
+                    document.getElementById("txtProPresenterIP").disabled = true;
+                    document.getElementById("txtProPresenterPort").disabled = true;
+                    document.getElementById("txtProPresenterPassword").disabled = true;
+                    document.getElementById("txtProPresenterLibraryPath").disabled = true;
+                    document.getElementById("btnRefreshData").style.display = "block";
+                    document.getElementById("btnClearAll").style.display = "block";
+                    document.getElementById("divProPresenter_PlaylistFollowControls").style.display = "block";
+                    document.getElementById("divProPresenterData_Container").style.visibility = "visible";
+                    document.getElementById("divProPresenterData_Container").style.opacity = "1";
+                    document.getElementById("divLogContainer").style.visibility = "visible";
+                    document.getElementById("divLogContainer").style.opacity = "1";             
+                }
+                else
+                {
+                    updateLog("Error connecting to ProPresenter. Invalid pasword. " + message.err, "error");
+                    document.getElementById("spanProPresenterConnectionStatusCircle").className = "dot error_dot";
+                    document.getElementById("divLogContainer").style.visibility = "visible";
+                    document.getElementById("divLogContainer").style.opacity = "1";
+                }
+                break;
+            case "sys":
+                break;
+            case "tmr":
+                //add support for timers/clocks
+                break;
+            case "vid":
+                //add support for video countdowns
+                break;
+            case "fv":
+                let currentSlide = message.ary[0].txt;
+                let currentSlide_notes = message.ary[2].txt;
+                let nextSlide = message.ary[1].txt;
+                let nextSlide_notes = message.ary[3].txt;
+                              
+                document.getElementById("divProPresenter_CurrentSlide").innerHTML = currentSlide.replaceAll("\n","<br>").replaceAll("\r","<br>");
+                document.getElementById("divProPresenter_CurrentSlide_Notes").innerHTML = currentSlide_notes.replaceAll("\n","<br>").replaceAll("\r","<br>");
+                document.getElementById("divProPresenter_NextSlide").innerHTML = nextSlide.replaceAll("\n","<br>").replaceAll("\r","<br>");
+                document.getElementById("divProPresenter_NextSlide_Notes").innerHTML = nextSlide_notes.replaceAll("\n","<br>").replaceAll("\r","<br>");
+                
+                updateTextListeners("current_slide", currentSlide);
+                updateTextListeners("current_slide_notes", currentSlide_notes);
+                updateTextListeners("next_slide", nextSlide);
+                updateTextListeners("next_slide_notes", nextSlide_notes);
+
+                break;
+            default:
+                console.log(message);
+                break;
+        }
+    });
+}
+
+function setupRemoteSocket()
+{
+    webSocketRemote = $.simpleWebSocket({ url: 'ws://'+config['propresenter_ip']+':'+config['propresenter_port']+'/remote' });
+    
+    webSocketRemote.send({"action":"authenticate","protocol":"600","password":config['propresenter_password']}).done(function() {
+    }).fail(function(e) {
+        console.log(e);
+    });    
+}
+
+function requestPlaylists()
+{
+    Playlists = []; // clear it back out
+    Presentations = []; // clear it back out
+    //ask for all playlist information
+    playlist_items_total = 0;
+    playlist_items_toprocess = 0;
+    document.getElementById("btnRefreshData").disabled = true;
+    __bridgeEnabled = false;
+    document.getElementById("divProPresenter_Playlists").style.display = "none";
+    document.getElementById("divProPresenter_Playlists").innerHTML = "";
+    document.getElementById("divProPresenter_PlaylistItems").style.display = "none";
+    document.getElementById("divProPresenter_PlaylistItems").innerHTML = "";
+
+    document.getElementById("chkSendToBridge").checked = false;
+    updateLog("Requesting All Playlist Information.", "normal");
+        
+    webSocketRemote.send({"action":"playlistRequestAll"}).done(function() {
+    }).fail(function(e) {
+        console.log(e);
+    });        
+}
+
+function requestPresentationInfo(presentationName) // get the information about this presentation
+{
+    // get playlist information
+    let slideQuality = document.getElementById("rangeProPresenterSlideQuality").value;
+    webSocketRemote.send({"action": "presentationRequest","presentationName": presentationName,"presentationPath": config['propresenter_librarypath'] + presentationName + ".pro6","presentationSlideQuality": slideQuality}).done(function() {
+    }).fail(function(e) {
+        console.log(e);
+    });
+}
+
+function findPresentation(slideObj) // find the presentation based on the trigger index and determine where we are in the song
+{
+    for (let i = 0; i < Presentations.length; i++)
+    {
+        if (Presentations[i].location === slideObj.presentationPath)
+        {
+            //this is the right presentation
+            let imgObj = document.createElement("img");
+            let imgData = Presentations[i].presentationData[slideObj.slideIndex].slideImage;
+            imgObj.src = "data:image/png;base64," + imgData;
+            imgObj.width = "250";
+            imgObj.height = "145";
+            //imgObj.style.display = "inline-block";
+            document.getElementById("divProPresenter_CurrentSlide_Image").innerHTML = "";
+            document.getElementById("divProPresenter_CurrentSlide_Image").appendChild(imgObj);
+            updateImageListeners("current_slide_image", imgData);
+            
+            if (document.getElementById("chkPlaylistFollowsProPresenter").checked)
+            {
+                updateDiv_PresentationItems(slideObj.presentationPath);
+            }
+
+            if (slideObj.presentationPath === selectedPresentation) //if this presentation is the one currently in the container
+            {
+                //loop through all child elements in array and find the one that matches the slide index, draw a border around it
+                let divContainer = document.getElementById("divProPresenter_PresentationItems");
+                let innerDivs = divContainer.childNodes;
+                for (let j = 0; j < innerDivs.length; j++)
+                {
+                    innerDivs[j].style.removeProperty("animation");
+                    if (innerDivs[j].id === "divSlide-" + slideObj.slideIndex)
+                    {
+                        innerDivs[j].style.animation = "selected-blink 1.5s ease infinite alternate";
+                        innerDivs[j].scrollIntoView({behavior: 'smooth', block: 'start'});
+                        let divIndex = document.getElementById("divProPresenter_PresentationItems_Options_Index");
+                        divIndex.innerHTML = "Slide " + (slideObj.slideIndex+1) + "/" + innerDivs.length;
+                    }
+                }
+            }
+            break;
+        }        
+    }
+}
+
+function ProPresenter_ClearAll()
+{
+    ProPresenter_Clear("all");
+}
+
+function ProPresenter_Clear(layer)
+{
+    let actionString = "";
+
+    switch(layer)
+    {
+        case "all":
+            actionString = "clearAll";
+            break;
+        case "text":
+            actionString = "clearText";
+            break;
+        case "audio":
+            actionString = "clearAudio";
+            break;
+        default:
+            break;
+    }
+
+    if (actionString !== "")
+    {
+        webSocketRemote.send({"action": actionString}).done(function() {
+            console.log("COMMAND SENT: " + actionString);
+        }).fail(function(e) {
+            console.log(e);
+        });
+    }
+}
+
+function ProPresenterAPI_AddPlaylistsToArray(playlistsObj)
+{
+    for (let i = 0; i < playlistsObj.playlistAll.length; i++)
+    {
+        let playlistObj = {};
+        playlistObj.name = playlistsObj.playlistAll[i].playlistName;
+        playlistObj.location = playlistsObj.playlistAll[i].playlistLocation; // storing this for now but not really sure what to do with it
+        playlistObj.items = playlistsObj.playlistAll[i].playlist;
+        Playlists.push(playlistObj);
+        updateLog(playlistObj.name + " " + "(" + playlistsObj.playlistAll[i].playlist.length + " items)", "normal-bold");
+        for (let j = 0; j < playlistsObj.playlistAll[i].playlist.length; j++)
+        {
+            let presentationObj = {};
+            if (playlistsObj.playlistAll[i].playlist[j].playlistItemType === "playlistItemTypePresentation") // don't add headers and such to the array, we don't need those
+            {
+                presentationObj.playListIndex = j; // the index in the original playlist playlistall object
+                presentationObj.playListNumber = i; //the index in the original playlist object
+                presentationObj.location = playlistsObj.playlistAll[i].playlist[j].playlistItemLocation; // the sort order
+                presentationObj.name = playlistsObj.playlistAll[i].playlist[j].playlistItemName; // the name of the playlist item
+                Presentations.push(presentationObj);
+                playlist_items_toprocess++; // add up the number of playlist items to process, since they come in asychronously, and we don't want to do any actions until all data is received
+                updateLog((j+1) + ": " + presentationObj.name, "normal");
+
+                requestPresentationInfo(presentationObj.name);
+            }
+        }
+    }
+    playlist_items_total = playlist_items_toprocess;
+}
+
+function ProPresenterAPI_AddPresentationToArray(presentationObj)
+{
+    //loop through global presentation array until we find the one that matches this song name, and then add the data to it
+    for (let i = 0; i < Presentations.length; i++)
+    {
+        if (Presentations[i].name === presentationObj.presentation.presentationName)
+        {
+            //Presentations[i].presentationData = presentationObj.presentation.presentationSlideGroups;
+            
+            //decrement the global array of playlist items now that we've received this one
+            playlist_items_toprocess--;
+            
+            Presentations[i].presentationData = [];
+            for (let j = 0; j < presentationObj.presentation.presentationSlideGroups.length; j++)
+            {
+                for (let k = 0; k < presentationObj.presentation.presentationSlideGroups[j].groupSlides.length; k++)
+                {
+                    let presentationDataObj = {};
+                    presentationDataObj.slideAttachmentMask = presentationObj.presentation.presentationSlideGroups[j].groupSlides[k].slideAttachmentMask;
+                    presentationDataObj.slideColor = presentationObj.presentation.presentationSlideGroups[j].groupSlides[k].slideColor;
+                    presentationDataObj.slideEnabled = presentationObj.presentation.presentationSlideGroups[j].groupSlides[k].slideEnabled;
+                    presentationDataObj.slideImage = presentationObj.presentation.presentationSlideGroups[j].groupSlides[k].slideImage;
+                    presentationDataObj.slideIndex = presentationObj.presentation.presentationSlideGroups[j].groupSlides[k].slideIndex;
+                    presentationDataObj.slideLabel = presentationObj.presentation.presentationSlideGroups[j].groupSlides[k].slideLabel;
+                    presentationDataObj.slideNotes = presentationObj.presentation.presentationSlideGroups[j].groupSlides[k].slideNotes;
+                    presentationDataObj.slideText = presentationObj.presentation.presentationSlideGroups[j].groupSlides[k].slideText;
+                    presentationDataObj.slideTransitionType = presentationObj.presentation.presentationSlideGroups[j].groupSlides[k].slideTransitionType;
+                    Presentations[i].presentationData.push(presentationDataObj);
+                }
+            }
+            break;
+        }
+    }
+    
+    if (playlist_items_toprocess === 0) // we are done processing, so let's enable the bridge to work
+    {
+        __bridgeEnabled = true;
+        updateLog("All playlist data received.", "connected");
+        document.getElementById("btnRefreshData").disabled = false;
+        document.getElementById("chkSendToBridge").checked = true;
+        document.getElementById("divProgressBar").style.display = "none";
+        updateDiv_Playlists();
+        document.getElementById("divProPresenter_Playlists").style.display = "inline-block";
+        document.getElementById("divProPresenter_PlaylistItems").style.display = "inline-block";
+    }
+    else
+    {
+        document.getElementById("divProgressBar").style.display = "block";
+        let progressBar = document.getElementById("progressBar");
+        let width = playlist_items_toprocess;
+        let totalWidth = playlist_items_total;
+        let progressWidth = 100 - ((width / totalWidth) * 100);
+        progressBar.style.width = progressWidth + '%';
+        
+        __bridgeEnabled = false;
+        document.getElementById("btnRefreshData").disabled = true;
+        document.getElementById("chkSendToBridge").checked = false;
+    }
+}
+
+function updateDiv_Playlists()
+{
+    let divPlaylists = document.getElementById("divProPresenter_Playlists");
+    divPlaylists.innerHTML = "";
+    let ulPlaylists = document.createElement("ul");
+    ulPlaylists.className = "w3-ul w3-hoverable";
+    
+    for (let i = 0; i < Playlists.length; i++)
+    {
+        let liPlaylist = document.createElement("li");
+        liPlaylist.innerHTML = Playlists[i].name;
+        liPlaylist.setAttribute('onclick', 'updateDiv_PlaylistItems(' + i + ');');
+        ulPlaylists.appendChild(liPlaylist);
+    }
+    
+    ulPlaylists.selectedIndex = 0;
+    
+    divPlaylists.innerHTML = "";
+    divPlaylists.appendChild(ulPlaylists);
+    document.getElementById("divProPresenter_PlaylistArea_Container").style.display = "block";
+}
+
+function updateDiv_PlaylistItems(index)
+{
+    let divPlaylistItems = document.getElementById("divProPresenter_PlaylistItems");
+    let ulPlaylistItems = document.createElement("ul");
+    ulPlaylistItems.className = "w3-ul w3-hoverable";
+        
+    for (let i = 0; i < Playlists[index].items.length; i++)
+    {
+        let liItem = document.createElement("li");
+        liItem.innerHTML = Playlists[index].items[i].playlistItemName;
+        liItem.setAttribute('onclick', 'updateDiv_PresentationItems("' + Playlists[index].items[i].playlistItemLocation + '");');
+        ulPlaylistItems.appendChild(liItem);
+    }
+    
+    ulPlaylistItems.selectedIndex = 0;
+    
+    divPlaylistItems.innerHTML = "";
+    divPlaylistItems.appendChild(ulPlaylistItems);
+}
+
+function updateDiv_PresentationItems(presentationLocation)
+{
+    var divContainer = document.getElementById("divProPresenter_PresentationItems");
+    divContainer.style.backgroundColor = "#666666";
+    
+    selectedPresentation = presentationLocation;
+    
+    for (let i = 0; i < Presentations.length; i++)
+    {
+        if (Presentations[i].location === presentationLocation)
+        {
+            document.getElementById("divProPresenter_PresentationItems_Title").innerHTML = Presentations[i].name;
+            divContainer.innerHTML = ""; //clear out the slides that were there before
+            for (let j = 0; j < Presentations[i].presentationData.length; j++)
+            {
+                let divObj = document.createElement("div");
+                let divInnerObj = document.createElement("div");
+                let imgObj = document.createElement("img");
+                imgObj.src = "data:image/png;base64," + Presentations[i].presentationData[j].slideImage;
+                imgObj.style.width = "100%";
+                imgObj.style.display = "block";
+                imgObj.alt = Presentations[i].presentationData[j].slideNotes;
+                divInnerObj.appendChild(imgObj);
+                
+                let slideColor = Presentations[i].presentationData[j].slideColor;
+                let slideLabel = Presentations[i].presentationData[j].slideLabel;
+                let divLabelObj = document.createElement("div");
+                divLabelObj.style.width = "100%";
+                divLabelObj.style.height = "22px";
+                divLabelObj.style.textAlign = "left";
+                divLabelObj.style.fontSize = "13px";
+                divLabelObj.style.display = "block";
+                divLabelObj.style.verticalAlign = "middle";
+                divLabelObj.style.whiteSpace = "nowrap";
+                divLabelObj.style.overflow = "hidden";
+                divLabelObj.style.textOverflow = "ellipsis";
+                divLabelObj.innerHTML = (j+1) + "." + slideLabel;
+                divLabelObj.style.backgroundColor = "#cccccc";
+                if (slideColor !== "")
+                {
+                    let rgbArr = slideColor.split(" ");
+                    let R = rgbArr[0];
+                    let G = rgbArr[1];
+                    let B = rgbArr[2];
+                    let A = rgbArr[3];
+                    
+                    let rgbaString = "rgba(" + (255 * R) + ", " + (255 * G) + ", " + (255 * B) + ", " + A + ")";
+                    divLabelObj.style.backgroundColor = rgbaString;
+                    divInnerObj.style.borderColor = rgbaString;
+                }
+                divInnerObj.appendChild(divLabelObj);
+                divInnerObj.className = "innerslideBox";
+                divInnerObj.id="divInnerSlide-" + j;
+                divObj.className = "slideBox";
+                divObj.style.zoom = document.getElementById("range_PresentationItems_Zoom").value;
+                divObj.appendChild(divInnerObj);
+                divObj.id = "divSlide-" + j;
+                if (!Presentations[i].presentationData[j].slideEnabled)
+                {
+                    divObj.style.opacity = "0.3";
+                }
+                divContainer.appendChild(divObj);
+            }
+            
+            //select the playlist name, if follow playlist is checked
+            /*let selPlaylists = document.getElementById("divProPresenter_Playlists");
+            let li_Playlists_items = selPlaylists.getElementsByTagName("li");
+            for (var j = 0; j < li_Playlists_items.length; j++)
+            {
+                li_Playlists_items[j].style.background = "#ffffff";
+                if (j === Presentations[i].playListNumber)
+                {
+                    li_Playlists_items[j].style.background = "#82b1ff";
+                    updateDiv_PlaylistItems(index);
+                }
+            }
+            
+            let selPlaylistItems = document.getElementById("divProPresenter_PlaylistItems");
+            let li_PlaylistItems_items = selPlaylistItems.getElementsByTagName("li");
+            for (var j = 0; j < li_PlaylistItems_items.length; j++)
+            {
+                li_PlaylistItems_items[j].style.background = "#ffffff";
+                if (j === Presentations[i].playListIndex)
+                {
+                    li_Playlists_items[j].style.background = "#82b1ff";
+                }
+            }*/
+
+            break;
+        }
+    }
+    
+    document.getElementById("divProPresenter_PresentationItems_Container").style.visibility = "visible";
+    document.getElementById("divProPresenter_PresentationItems_Container").style.opacity = "1";
+}
+    
+function setupStageDisplaySocket()
+{  
+    //Connect to ProPresenter Remote Stage Display
+    webSocketStageDisplay = $.simpleWebSocket({ url: 'ws://'+config['propresenter_ip']+':'+config['propresenter_port']+'/stagedisplay' });
+    
+    webSocketStageDisplay.send({"pwd":config['propresenter_password'],"ptl":610,"acn":"ath"}).done(function() {
+
+    }).fail(function(e) {
+        // error sending
+        updateLog("An Error occurred connecting to ProPresenter.", "error");
+        document.getElementById("spanProPresenterConnectionStatusCircle").className = "error_dot";
+    });
+}
+
+function BridgeRooms_Connect()
+{    
+    socket = io.connect();
+
+    socket.on('connect', function() {
+        socket.emit("room", "BridgeRooms");
+       socket.emit("bridgerooms_getall");
+    });
+    
+    socket.on("bridgerooms", function (bridgeArray) {
+       Bridges = bridgeArray;
+       updateBridgeList();
+    });
+    
+    socket.on("bridgerooms_authenticated", function(authValue) {
+       if (authValue)
+       {
+            updateLog("Connected to Bridge.", "connected");
+            document.getElementById("spanBridgeConnectionStatusCircle").className = "dot connected_dot";
+            document.getElementById("txtBridgeControlPassword").disabled = true;
+            document.getElementById("btnConnectToBridge").style.display = "none";
+            document.getElementById("btnDisconnectBridge").style.display = "block";
+            document.getElementById("divSendToBridge").style.display = "block";
+            document.getElementById("divGoToLogo").style.display = "block";
+            document.getElementById("divKeepAwake").style.display = "block";
+            document.getElementById("divLogContainer").style.visibility = "visible";
+            document.getElementById("divLogContainer").style.opacity = "1";
+            document.getElementById("divConnectionStatus").style.visibility = "visible";
+            document.getElementById("divConnectionStatus").style.opacity = "1";
+            document.getElementById("divAnnouncements").style.visibility = "visible";
+            document.getElementById("divAnnouncements").style.opacity = "1";
+            document.getElementById("divConnectedClients").style.visibility = "visible";
+            document.getElementById("divConnectedClients").style.opacity = "1";
+       }
+       else
+       {
+            updateLog("Error connecting to Bridge: Password was incorrect.", "error");
+            document.getElementById("spanBridgeConnectionStatusCircle").className = "dot error_dot";
+            document.getElementById("divLogContainer").style.visibility = "visible";
+            document.getElementById("divLogContainer").style.opacity = "1";
+       }
+    });
+    
+    socket.on("bridgerooms_inuse", function(value) {
+       if (value)
+       {
+            updateLog("Error connecting to Bridge: Bridge already in use.", "error");
+            document.getElementById("spanBridgeConnectionStatusCircle").className = "dot error_dot";
+            document.getElementById("divLogContainer").style.visibility = "visible";
+            document.getElementById("divLogContainer").style.opacity = "1";
+       }
+    });
+    
+    socket.on("bridgerooms_selectedbridge", function(bridgeID) {
+       selectedBridgeID = bridgeID; 
+    });
+    
+    socket.on('client_connected', function(clientObj) {
+        console.log("Client connected.");
+        AddClient(clientObj);
+    });
+    
+    socket.on('client_disconnected', function(socketID) {
+        console.log("Client disconnected.");
+        RemoveClient(socketID);
+    });
+}
+
+function AddClient(clientObj)
+{   
+    Clients.push(clientObj);
+    UpdateConnectedClients();
+}
+
+function RemoveClient(socketID)
+{
+    let index = null;
+    
+    for (let i = 0; i < Clients.length; i++)
+    {
+        if (Clients[i].socketID === socketID)
+        {
+            index = i;
+            break;
+        }
+    }
+    
+    if (index !== null)
+    {
+        Clients.splice(index, 1);
+    }
+    
+    UpdateConnectedClients();
+}
+
+function UpdateConnectedClients()
+{
+    let textClients = Clients.filter(function (obj) { return obj.roomType.toString() === "TextListeners"; });
+    let imageClients = Clients.filter(function (obj) { return obj.roomType.toString() === "ImageListeners"; });
+    
+    document.getElementById("textClientsNumber").innerHTML = textClients.length;
+    document.getElementById("imageClientsNumber").innerHTML = imageClients.length;
+    
+    console.log("Text Clients: " + textClients.length);
+    console.log("Image Clients: " + imageClients.length);
+    console.log(Clients);
+}
+
+function BridgeRooms_Login()
+{
+   let bridgeID = document.getElementById("selBridgeList").options[document.getElementById("selBridgeList").selectedIndex].value;
+  
+   if (bridgeID !== "0")
+   {
+        let password = document.getElementById("txtBridgeControlPassword").value;
+        socket.emit("bridgerooms_authenticate", bridgeID, password);
+   }
+   else
+   {
+       // alert to select a bridge ID
+       alert("Please select a Bridge to log in.");
+   }
+}
+
+function BridgeRooms_Disconnect()
+{
+    socket.emit("bridgerooms_disconnect", selectedBridgeID, false);
+    document.getElementById("spanBridgeConnectionStatusCircle").className = "dot disconnected_dot";
+    document.getElementById("btnConnectToBridge").style.display = "block";
+    document.getElementById("btnDisconnectBridge").style.display = "none";
+}
+
+function Bridge_GoToLogo(value)
+{
+    socket.emit("gotologo", selectedBridgeID, value);
+}
+
+function Bridge_KeepAwake(value)
+{
+    socket.emit("keepawake", selectedBridgeID, value);
+}
+
+function Bridge_Redirect()
+{
+    socket.emit("redirect", selectedBridgeID, document.getElementById("txtAnnouncements_URL").value);
+}
+
+function Bridge_SendAnnouncement()
+{
+    socket.emit("announcement", selectedBridgeID, document.getElementById("txtAnnouncements_Text").value);
+}
+
+function Bridge_Reload()
+{
+    socket.emit("reload", selectedBridgeID, true);
+    console.log("reloading clients.");
+}
+
+function updateBridgeList()
+{
+    var selBridgeList = document.getElementById("selBridgeList");
+    selBridgeList.options.length = 0;
+    
+    let opt_default = document.createElement("option");
+    opt_default.value = "0";
+    opt_default.text = "(select a bridge)";
+    selBridgeList.appendChild(opt_default);
+    
+    for (let i = 0; i < Bridges.length; i++)
+    {
+        let opt = document.createElement("option");
+        opt.value = Bridges[i].id;
+        opt.text = Bridges[i].name;
+        if (Bridges[i].id === selectedBridgeID)
+        {
+            opt.selected = "selected";
+        }
+        selBridgeList.appendChild(opt);
+    }
+}
+    
+function updateTextListeners(socketMode, text) //triggers Dashboard with current status
+{
+    if (__bridgeEnabled)
+    {
+        // send the text to the listener to update all clients
+        if (socket !== null)
+        {
+            socket.emit(socketMode, selectedBridgeID, text);
+        }
+    }
+}
+
+function updateImageListeners(socketMode, img)
+{
+    if (__bridgeEnabled)
+    {
+        if (socket !== null)
+        {
+            socket.emit(socketMode, selectedBridgeID, img);
+        }
+    }
+}
+
+function selBridgeList_ShowPassword()
+{
+    let bridgeID = document.getElementById("selBridgeList").options[document.getElementById("selBridgeList").selectedIndex].value;
+
+    let bridgeObj = getBridge(bridgeID);
+    
+    if (bridgeObj.requiresPassword)
+    {
+        document.getElementById("labelBridgeControlPassword").style.display = "block";
+        document.getElementById("txtBridgeControlPassword").style.display = "block";
+    }
+    else
+    {
+        document.getElementById("labelBridgeControlPassword").style.display = "none";
+        document.getElementById("txtBridgeControlPassword").style.display = "none";
+    }
+}
+
+function getBridge(bridgeID)
+{
+    let bridgeObj = null;
+    
+    for (let i = 0; i < Bridges.length; i++)
+    {
+        if (Bridges[i].id === bridgeID)
+        {
+            bridgeObj = Bridges[i];
+        }
+    }
+    
+    return bridgeObj;
+}
+	
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
+
+function PresentationItems_ChangeZoom()
+{
+    //loop through all these divProPresenter_PresentationItems
+    // named divSlide-i
+    
+    let rangeValue = document.getElementById("range_PresentationItems_Zoom").value;
+    
+    //loop through all child elements in array and increase the size
+    let divContainer = document.getElementById("divProPresenter_PresentationItems");
+    let innerDivs = divContainer.childNodes;
+    for (let j = 0; j < innerDivs.length; j++)
+    {
+        if (innerDivs[j].id.substring(0, 8) === "divSlide")
+        {
+            innerDivs[j].style.zoom = rangeValue;
+        }
+    }
+}
+</script>
+</head>
+<body onLoad="onLoad();">
+<div id="container">
+    <div id="title"><span style="font-size: 36px; font-weight: bold; padding: 5px;">Presentation Bridge</span><a href="/about">About this software</a></div>
+        <div id="divProPresenterConfig">
+            <span style="font-weight:bold; font-size: 16px;">ProPresenter Config</span><br />
+            <label for="txtProPresenterIP">IP Address:</label><input type="text" id="txtProPresenterIP" value="192.168.11.75" size="15"/><br />
+            <label for="txtProPresenterPort">Port:</label><input type="text" id="txtProPresenterPort" value="52174" size="6" /><br />
+            <label for="txtProPresenterPassword">Control Password:</label><input type="password" id="txtProPresenterPassword" value="control22" /><br />
+            <label for="txtProPresenterLibraryPath">Library Path:</label><input type="text" id="txtProPresenterLibraryPath" value="/Users/technician/Dropbox (FG)/ProPresenter Libraries/Auditorium 2 CG/" /><br />
+            <label for="rangeProPresenterSlideQuality">Image Quality:</label><input type="range" min="25" max="1920" value="960" id="rangeProPresenterSlideQuality" />
+            <button id="btnConnectToProPresenter">Connect to ProPresenter</button>
+            <span id="spanProPresenterConnectionStatusCircle" class="dot disconnected_dot"></span>
+        </div>
+        <div id="divBridgeConfig">
+            <span style="font-weight:bold; font-size: 16px;">Bridge Config</span><br />
+            <label id="labelBridgeList">Bridge:</label>
+            <select id="selBridgeList" onchange="selBridgeList_ShowPassword();">
+                <option value="0">(select a bridge)</option>
+            </select><br />
+            <label id="labelBridgeControlPassword" for="txtBridgeControlPassword">Password:</label><input type="password" size="15" id="txtBridgeControlPassword" /><br />
+            <button id="btnDisconnectBridge">Disconnect</button><br />
+            <button id="btnConnectToBridge">Connect to Bridge</button><br />
+            <span id="spanBridgeConnectionStatusCircle" class="dot disconnected_dot"></span>
+            <a href="/config"><img id="settingsImage" src="images/settings.png" alt="Config" /></a>
+        </div>
+        <div id="divConnectionStatus">
+            <button id="btnRefreshData" disabled>Refresh ProPresenter Data</button>
+            <div class="onoffswitch" id="divSendToBridge">
+                <input type="checkbox" class="onoffswitch-checkbox" id="chkSendToBridge">
+                <label class="onoffswitch-label" for="chkSendToBridge">
+                    <span class="onoffswitch-inner onoffswitch-inner-senddata"></span>
+                    <span class="onoffswitch-switch"></span>
+                </label>
+            </div>
+            <div class="onoffswitch" id="divProPresenter_PlaylistFollowControls">
+                <input type="checkbox" class="onoffswitch-checkbox" id="chkPlaylistFollowsProPresenter" checked>
+                <label class="onoffswitch-label" for="chkPlaylistFollowsProPresenter">
+                    <span class="onoffswitch-inner onoffswitch-inner-playlist"></span>
+                    <span class="onoffswitch-switch"></span>
+                </label>
+            </div>
+            <div class="onoffswitch" id="divGoToLogo">
+                <input type="checkbox" class="onoffswitch-checkbox" id="chkGoToLogo" checked>
+                <label class="onoffswitch-label" for="chkGoToLogo">
+                    <span class="onoffswitch-inner onoffswitch-inner-GoToLogo"></span>
+                    <span class="onoffswitch-switch"></span>
+                </label>
+            </div>
+            <div class="onoffswitch" id="divKeepAwake">
+                <input type="checkbox" class="onoffswitch-checkbox" id="chkKeepAwake">
+                <label class="onoffswitch-label" for="chkKeepAwake">
+                    <span class="onoffswitch-inner onoffswitch-inner-KeepAwake"></span>
+                    <span class="onoffswitch-switch"></span>
+                </label>
+            </div>
+            <div id="divClearAll">
+                <button id="btnClearAll">Clear All In ProPresenter</button>
+            </div>
+        </div>
+        <div id="divLogContainer">
+            <div id="divProgressBar">
+                <div id="progressBar"></div>
+            </div>
+            <div id="divLog"></div>
+        </div>
+    <div id="divProPresenterData_Container">
+        <div id="divProPresenterData">
+            <div id="divProPresenter_CurrentSlide_Container">
+                <div id="divProPresenter_CurrentSlide_Title">Current Slide Text</div>
+                <div id="divProPresenter_CurrentSlide"></div>
+                <div id="divProPresenter_CurrentSlide_Notes"></div>
+            </div>
+            <div id="divProPresenter_CurrentSlide_ImageContainer">
+                <div id="divProPresenter_CurrentSlide_ImageTitle">Current Slide Image</div>
+                <div id="divProPresenter_CurrentSlide_Image"></div>
+            </div>
+            <div id="divProPresenter_NextSlide_Container">
+                <div id="divProPresenter_NextSlide_Title">Next Slide</div>
+                <div id="divProPresenter_NextSlide"></div>
+                <div id="divProPresenter_NextSlide_Notes"></div>
+            </div>
+            <div id="divProPresenter_PlaylistArea_Container">
+                <div id="divProPresenter_Playlists"></div>
+                <div id="divProPresenter_PlaylistItems"></div>
+            </div>
+        </div>
+    </div>
+    <div id="divProPresenter_PresentationItems_Container">
+        <div id="divProPresenter_PresentationItems_Title"></div>
+        <div id="divProPresenter_PresentationItems"></div>
+        <div id="divProPresenter_PresentationItems_Options">
+            <div id="divProPresenter_PresentationItems_Options_Index"></div>
+            <div id="divProPresenter_PresentationItems_Options_Zoom">
+                <label for="range_PresentationItems_Zoom">Zoom:</label>
+                <input type="range" min="1" max="3" value="1" step="0.1" id="range_PresentationItems_Zoom" oninput="PresentationItems_ChangeZoom();" />
+            </div>
+        </div>
+    </div>
+    <div id="divAnnouncements">
+        Redirect to:<br />
+        <input type="text" id="txtAnnouncements_URL" value="http://www.fellowshipgreenville.org/newtofg" />
+        <button id="btnAnnouncements_RedirectTo">Redirect to URL</button>
+        <br /><br />
+        Send text/announcement:<br />
+        <textarea rows="4" cols="50" id="txtAnnouncements_Text"></textarea>
+        <button id="btnAnnouncements_SendText">Send</button>
+        <button id="btnAnnouncements_ReloadListeners">Remotely Reload All Listeners</button>
+    </div>
+    <div id="divConnectedClients">
+        Connected Text Clients: <span id="textClientsNumber"></span><br />
+        Connected Image Clients: <span id="imageClientsNumber"></span>
+    </div>
+</div>
+</body>
+</html>
