@@ -19,6 +19,7 @@ To contact the author or for more information, please visit [www.techministry.bl
 1. Make sure Node.js is installed.
 
 1. In the terminal, from the path you placed the release files, type:
+`npm install` then
 `node main.js [port]`
 where *[port]* is the TCP port you wish to run the server on.
 **If you leave this blank, it will attempt to run on port 80, which may need administrative privileges.**
