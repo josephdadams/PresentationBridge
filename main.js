@@ -75,6 +75,10 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/views/textlistener.html');
 });
 
+app.get('/lowerthird', function (req, res) {
+    res.sendFile(__dirname + '/views/lowerthird.html');
+});
+
 app.get('/image', function (req, res) {
     res.sendFile(__dirname + '/views/imagelistener.html');
 });
