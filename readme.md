@@ -44,6 +44,7 @@ Example: */Users/technician/Documents/ProPresenter6/*
 
 1. Clients can connect by going to your server IP address with these listeners:
     * / - the default "text listener"
+    * /lowerthird - the lower third listener with a green background for chroma key
     * /image - the image listener
     * /stagedisplay - the stage display version that shows the current and next slides
 
