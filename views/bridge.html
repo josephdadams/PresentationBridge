@@ -880,8 +880,7 @@ function setupRemoteSocket()
 {
     webSocketRemote = $.simpleWebSocket({ url: 'ws://'+config['propresenter_ip']+':'+config['propresenter_port']+'/remote' });
     
-    webSocketRemote.send({"action":"authenticate","protocol":"700","password":config['propresenter_password']}).done(function(e) {
-        console.log(e);
+    webSocketRemote.send({"action":"authenticate","protocol":"700","password":config['propresenter_password']}).done(function() {
     }).fail(function(e) {
         console.log(e);
     });    
@@ -905,7 +904,6 @@ function requestPlaylists()
     updateLog("Requesting All Playlist Information.", "normal");
         
     webSocketRemote.send({"action":"playlistRequestAll"}).done(function(e) {
-        console.log(e);
     }).fail(function(e) {
         console.log(e);
     });        
@@ -915,8 +913,7 @@ function requestPresentationInfo(presentationName) // get the information about 
 {
     // get playlist information
     let slideQuality = document.getElementById("rangeProPresenterSlideQuality").value;
-    webSocketRemote.send({"action": "presentationRequest","presentationPath": config['propresenter_librarypath'] + presentationName + ".pro","presentationSlideQuality": slideQuality}).done(function(e) {
-        console.log(e);
+    webSocketRemote.send({"action": "presentationRequest","presentationPath": config['propresenter_librarypath'] + presentationName + ".pro","presentationSlideQuality": slideQuality}).done(function() {
     }).fail(function(e) {
         console.log(e);
     });
