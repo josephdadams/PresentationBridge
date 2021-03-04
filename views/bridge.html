@@ -903,7 +903,7 @@ function requestPlaylists()
     document.getElementById("chkSendToBridge").checked = false;
     updateLog("Requesting All Playlist Information.", "normal");
         
-    webSocketRemote.send({"action":"playlistRequestAll"}).done(function(e) {
+    webSocketRemote.send({"action":"playlistRequestAll"}).done(function() {
     }).fail(function(e) {
         console.log(e);
     });        
