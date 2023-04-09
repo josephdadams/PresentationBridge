@@ -87,7 +87,7 @@ app.get('/config', function (req, res) {
     res.sendFile(__dirname + '/views/config.html');
 });
 
-app.use(express.static('views/static'));
+app.use(express.static(__dirname + '/views/static'));
 
 io.sockets.on("connection", function(socket) {
     // CONFIG SOCKETS //
